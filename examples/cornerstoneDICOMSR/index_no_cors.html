@@ -16,11 +16,6 @@
                 <h1>
                     Create DICOM Structured Report with 1501 Meaurement groups
                 </h1>
-                <p>
-                    This example demonstrates creation of a DICOM Structured
-                    Report containing length measurements.
-                </p>
-                <a href="../index.html">Go back to the Examples page</a>
             </div>
 
             <div class="row">
@@ -63,41 +58,33 @@
                         onselectstart="return false;"
                         onmousedown="return false;"
                     >
-                        <div
-                            id="cornerstoneViewport"
-                            style="width:512px;height:512px;top:0px;left:0px; position:absolute;"
-                        ></div>
+                    <div
+                        id="cornerstoneViewport"
+                        style="width:512px;height:512px;top:0px;left:0px; position:absolute;"
+                    ></div>
                     </div>
-                    <p>
-                        Sample data is from the dicom4qi connectathon event to
-                        be held at RSNA 2017. This is
-                        <a
-                            href="https://qiicr.gitbooks.io/dicom4qi/content/instructions/seg.html#test-dataset-2"
-                            >test dataset #2</a
-                        >
-                    </p>
                 </div>
             </div>
         </div>
 
-        <script src="https://unpkg.com/cornerstone-core@2.2.6/dist/cornerstone.js"></script>
-        <script src="https://unpkg.com/cornerstone-math@0.1.6/dist/cornerstoneMath.js"></script>
-        <script src="https://unpkg.com/cornerstone-tools@4.16.1/dist/cornerstoneTools.js"></script>
+        <script crossorigin src="https://unpkg.com/cornerstone-core@2.2.6/dist/cornerstone.js"></script>
+        <script crossorigin src="https://unpkg.com/cornerstone-math@0.1.6/dist/cornerstoneMath.js"></script>
+        <script crossorigin src="https://unpkg.com/cornerstone-tools@4.16.1/dist/cornerstoneTools.js"></script>
 
-        <script src="https://unpkg.com/dicom-parser/dist/dicomParser.js"></script>
-        <script src="https://unpkg.com/cornerstone-wado-image-loader@3.0.2/dist/cornerstoneWADOImageLoader.min.js"></script>
+        <script crossorigin src="https://unpkg.com/dicom-parser/dist/dicomParser.js"></script>
+        <script crossorigin src="https://unpkg.com/cornerstone-wado-image-loader@3.0.2/dist/cornerstoneWADOImageLoader.min.js"></script>
         <script src="https://unpkg.com/hammerjs/hammer.min.js"></script>
 
-        <script src="../js/initCornerstone.js"></script>
-        <script src="../js/dcmjs.js"></script>
+        <script crossorigin src="../js/initCornerstone.js"></script>
+        <script crossorigin src="../js/dcmjs.js"></script>
 
         <script
             src="https://unpkg.com/react@16/umd/react.development.js"
             crossorigin
         ></script>
-        <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
 
-        <script>
+        <script crossorigin >
             "use strict";
 
             var process = {
@@ -109,10 +96,88 @@
             window.process = process;
         </script>
 
-        <script src="https://unpkg.com/react-cornerstone-viewport@0.1.23/dist/index.umd.js"></script>
+        <script crossorigin src="https://unpkg.com/react-cornerstone-viewport@4.1.0/dist/index.umd.js"></script>
 
-        <script>
+        <script crossorigin>
+
+            let imageIds = [
+                "wadors:http://127.0.0.1:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.2.840.113619.2.65.4.217920172153.11836.1067526228.1/series/1.2.840.113619.2.65.4.217920172153.11836.1067526228.2/instances/1.2.840.113619.2.65.4.217920172153.11836.1067526234.51",
+                "wadors:http://127.0.0.1:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.2.840.113619.2.65.4.217920172153.11836.1067526228.1/series/1.2.840.113619.2.65.4.217920172153.11836.1067526228.2/instances/1.2.840.113619.2.65.4.217920172153.11836.1067526236.166"
+            ]
+
             let metaData = {};
+            const { getNumberValue, getValue } = cornerstoneWADOImageLoader.wadors.metaData;
+            cornerstone.metaData.addProvider(function wadoRsMetaDataProvider(type, imageId) {
+                const metaData = cornerstoneWADOImageLoader.wadors.metaDataManager.get(
+                    imageId
+                );
+
+                if (!metaData) {
+                    return;
+                }
+
+                if (
+                    metaData[type] !== undefined &&
+                    metaData[type].Value !== undefined &&
+                    metaData[type].Value.length
+                ) {
+                    return metaData[type].Value[0];
+                }
+
+                const typeCleaned = type.replace('x', '');
+                if (
+                    metaData[typeCleaned] !== undefined &&
+                    metaData[typeCleaned].Value !== undefined &&
+                    metaData[typeCleaned].Value.length
+                ) {
+                    return metaData[typeCleaned].Value[0];
+                }
+
+                if (type === 'generalImageModule') {
+                    return {
+                    sopInstanceUid: getValue(metaData['00080018']),
+                    instanceNumber: getNumberValue(metaData['00200013']),
+                    lossyImageCompression: getValue(metaData['00282110']),
+                    lossyImageCompressionRatio: getValue(metaData['00282112']),
+                    lossyImageCompressionMethod: getValue(metaData['00282114']),
+                    };
+                }
+
+                if (type === 'patientModule') {
+                    const patientValue = getValue(metaData['00100010']);
+                    let patientName;
+                    if (typeof patientValue === 'string') {
+                    patientName = patientValue;
+                    } else if (typeof patientValue === 'object') {
+                    patientName = patientValue.Alphabetic;
+                    }
+                    return {
+                    patientName: patientName,
+                    patientId: getValue(metaData['00100020']),
+                    patientSex: getValue(metaData['00100040']),
+                    patientBirthDate: getValue(metaData['00100030']),
+                    };
+                }
+
+                if (type === 'spacingBetweenSlices') {
+                    return getValue(metaData['00180088']);
+                }
+
+                if (type === 'generalStudyModule') {
+                    return {
+                    studyDescription: getValue(metaData['00081030']),
+                    studyDate: getValue(metaData['00080020']),
+                    studyTime: getValue(metaData['00080030']),
+                    accessionNumber: getValue(metaData['00080050']),
+                    };
+                }
+
+                if (type === 'cineModule') {
+                    return {
+                    frameTime: getNumberValue(metaData['00181063']),
+                    };
+                }
+                });
 
             function createStructuredReport() {
                 const toolState =
@@ -136,7 +201,7 @@
             function loadStructuredReport() {
                 const url =
                     window.location.origin +
-                    "/examples/data/structured_report.dcm";
+                    "/examples/data/structured_report_1.dcm";
 
                 const xhr = new XMLHttpRequest();
 
@@ -156,17 +221,13 @@
                         dataset
                     );
 
-                    const imageId1 =
-                        "dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.11.dcm";
-
+                    const imageId1 = imageIds[0];
                     const generalSeriesModule1 = cornerstone.metaData.get(
                         "sopCommonModule",
                         imageId1
                     );
 
-                    const imageId2 =
-                        "dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.12.dcm";
-
+                    const imageId2 = imageIds[1];
                     const generalSeriesModule2 = cornerstone.metaData.get(
                         "sopCommonModule",
                         imageId2
@@ -252,55 +313,101 @@
                 }
                 return imageIds;
             }
-        </script>
 
-        <script>
-            "use strict";
 
-            var exampleData = {
-                stack: {
-                    currentImageIdIndex: 0,
-                    imageIds: [
-                        "dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.11.dcm",
-                        "dicomweb://s3.amazonaws.com/lury/PTCTStudy/1.3.6.1.4.1.25403.52237031786.3872.20100510032220.12.dcm"
-                    ]
+
+        let imageIdsWithMetaDataAdded = []
+        function getImageFrameURI(metadataURI, metadata) {
+            // Use the BulkDataURI if present int the metadata
+            if (metadata["7FE00010"] && metadata["7FE00010"].BulkDataURI) {
+                return metadata["7FE00010"].BulkDataURI
+            }
+
+            // fall back to using frame #1
+            return metadataURI + '/frames/1';
+        }
+
+        for (let i = 0; i < imageIds.length; i++) {
+            const url = imageIds[i].split("wadors:")[1];
+            const metadataURI = url + "/metadata";
+
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    // Make sure it's a JSON document
+                    data = JSON.parse(this.responseText);
+
+                    console.log(data);
+
+                    const metadata = data[0];
+                    const imageFrameURI = getImageFrameURI(metadataURI, metadata);
+                    const imageId = 'wadors:' + imageFrameURI;
+
+                    cornerstoneWADOImageLoader.wadors.metaDataManager.add(imageId, metadata);
+                    imageIdsWithMetaDataAdded.push(imageId);
+                    if (imageIdsWithMetaDataAdded.length == imageIds.length) {
+                        reactLoad();
+                    }
                 }
             };
 
-            var CornerstoneViewport = window["react-cornerstone-viewport"];
+            xhr.open("GET", metadataURI, true);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.send();
+        }
+
+        function reactLoad() {
+            var exampleData = {
+                stack: {
+                    currentImageIdIndex: 0,
+                    imageIds: imageIds
+                }
+            };
+
+            var CornerstoneViewport = window["react-cornerstone-viewport"].default;
             var props = {
+                imageIds: imageIds,
                 viewportData: exampleData,
                 cornerstone,
                 cornerstoneTools,
                 activeTool: "Length",
-                availableTools: [
+                tools: [
                     // Mouse
                     {
                         name: "Length",
-                        mouseButtonMasks: [1]
+                        mouseButtonMasks: [1],
+                        mode: 'active' 
                     },
                     {
                         name: "Zoom",
-                        mouseButtonMasks: [2]
+                        mouseButtonMasks: [2],
+                        mode: 'active'
                     },
                     {
                         name: "Pan",
-                        mouseButtonMask: [4]
+                        mouseButtonMask: [4],
+                        mode: 'active'
                     },
                     {
                         name: "Bidirectional",
-                        mouseButtonMasks: [1]
+                        mouseButtonMasks: [1],
+                        mode: 'active'
                     },
                     {
                         name: "EllipticalRoi",
-                        mouseButtonMasks: [1]
+                        mouseButtonMasks: [1],
+                        mode: 'active'
                     },
                     {
                         name: "ArrowAnnotate",
-                        mouseButtonMasks: [1]
+                        mouseButtonMasks: [1],
+                        mode: 'active'
                     },
                     // Scroll
-                    { name: "StackScrollMouseWheel" }
+                    { 
+                        name: "StackScrollMouseWheel",
+                        mode: 'active' 
+                    }
                 ]
             };
 
@@ -310,6 +417,7 @@
                 app,
                 document.getElementById("cornerstoneViewport")
             );
+        }
         </script>
     </body>
 </html>

@@ -15,7 +15,7 @@ class DICOMZero {
     this.context = {patients: []};
   }
 
-  static datasetFromArrayBuffer(arrayBuffer) {
+  datasetFromArrayBuffer(arrayBuffer) {
     let dicomData = dcmjs.data.DicomMessage.readFile(arrayBuffer);
     let dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(dicomData.dict);
     dataset._meta = dcmjs.data.DicomMetaDictionary.namifyDataset(dicomData.meta);
