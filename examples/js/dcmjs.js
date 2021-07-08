@@ -8057,6 +8057,11 @@
 	      var SCOORDGroup = toArray(NUMGroup.ContentSequence).find(function (group) {
 	        return group.ValueType === "SCOORD";
 	      });
+		  if (SCOORDGroup === undefined) {
+			SCOORDGroup = toArray(ContentSequence).find(function (group) {
+				return group.ValueType === "SCOORD" || group.ValueType === "SCOORD3D";
+			  });
+		  }
 	      var GraphicData = SCOORDGroup.GraphicData;
 	      var majorAxis = [{
 	        x: GraphicData[0],
@@ -12612,6 +12617,9 @@ b"+i+"*=d\
 
 	    if (multiframe.SourceImageSequence) {
 	      SourceImageSequence = multiframe.SourceImageSequence[_i3];
+		  if (SourceImageSequence == undefined) {
+			SourceImageSequence = multiframe.SourceImageSequence;
+		  }
 	    } else {
 	      SourceImageSequence = PerFrameFunctionalGroups.DerivationImageSequence.SourceImageSequence;
 	    }
