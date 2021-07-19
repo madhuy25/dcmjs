@@ -77,8 +77,8 @@
         <script crossorigin>
 
             let imageIds = [
-                "wadors:http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.3.6.1.4.1.5962.1.2.1.20040119072730.12322/series/1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322/instances/1.3.6.1.4.1.5962.1.1.1.1.1.20040119072730.12322",
-                "wadors:http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.3.6.1.4.1.5962.1.2.1.20040119072730.12322/series/1.3.6.1.4.1.5962.1.3.1.1.20040119072730.12322/instances/1.3.6.1.4.1.5962.1.1.1.1.1.20040119072730.12322"
+                "wadors:http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.2.840.113619.2.65.4.217920172153.11836.1067526228.1/series/1.2.840.113619.2.65.4.217920172153.11836.1067526228.2/instances/1.2.840.113619.2.65.4.217920172153.11836.1067526234.51",
+                "wadors:http://localhost:8080/dcm4chee-arc/aets/DCM4CHEE/rs/studies/1.2.840.113619.2.65.4.217920172153.11836.1067526228.1/series/1.2.840.113619.2.65.4.217920172153.11836.1067526228.2/instances/1.2.840.113619.2.65.4.217920172153.11836.1067526236.166"
             ]
 
             function getImagePlaneModule(metaData) {
@@ -366,7 +366,14 @@
                 viewportData: exampleData,
                 cornerstone,
                 cornerstoneTools,
-                activeTool: "Brush"    
+                activeTool: "Brush",
+                tools: [
+                    // Scroll
+                    { 
+                        name: "StackScrollMouseWheel",
+                        mode: 'active' 
+                    }
+                ]    
             };
 
             var app = React.createElement(CornerstoneViewport, props, null);
